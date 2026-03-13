@@ -75,6 +75,9 @@ real-estate-investor-tools/
 - Properties CRUD in dedicated hook to avoid prop drilling
 - Components split by responsibility (layout, auth, property, common)
 - Each component file focused on single responsibility
+- Shared Navbar component to avoid duplication across pages
+- Layout components (PublicLayout, PrivateLayout) for consistent page structure
+- PropertyDetail for read-only view before editing
 
 ---
 
@@ -1013,6 +1016,201 @@ Verify:
 ```bash
 git add .
 git commit -m "feat: setup routing with landing, login, and dashboard pages"
+```
+
+---
+
+### Task 8a: Create Shared Navbar Component
+
+**Files:**
+- Create: `src/components/layout/Navbar.jsx`
+
+- [ ] **Step 1: Create reusable Navbar component**
+
+Create `src/components/layout/Navbar.jsx`:
+
+```jsx
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
+
+export default function Navbar({ showAddButton = false }) {
+  const navigate = useNavigate();
+  const { user, signOut } = useAuth();
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      navigate('/');
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
+
+  return (
+    <div className="navbar bg-base-100 shadow-lg">
+      <div className="flex-1">
+        <span
+          className="text-xl font-bold px-4 cursor-pointer"
+          onClick={() => navigate('/dashboard')}
+        >
+          RE Investor Tools
+        </span>
+      </div>
+      <div className="flex-none gap-2">
+        {showAddButton && (
+          <button
+            className="btn btn-primary"
+            onClick={() => navigate('/property/new')}
+          >
+            Add Property
+          </button>
+        )}
+        <div className="dropdown dropdown-end">
+          <label tabIndex={0} className="btn btn-ghost btn-circle avatar">
+            <div className="w-10 rounded-full">
+              {user?.photoURL ? (
+                <img src={user.photoURL} alt={user.displayName} />
+              ) : (
+                <div className="bg-neutral-focus text-neutral-content rounded-full w-10 h-10 flex items-center justify-center">
+                  {user?.email?.[0].toUpperCase()}
+                </div>
+              )}
+            </div>
+          </label>
+          <ul tabIndex={0} className="mt-3 p-2 shadow menu menu-compact dropdown-content bg-base-100 rounded-box w-52">
+            <li className="menu-title">
+              <span>{user?.email}</span>
+            </li>
+            <li>
+              <button onClick={handleSignOut}>Logout</button>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  );
+}
+```
+
+- [ ] **Step 2: Commit**
+
+```bash
+git add .
+git commit -m "feat: create reusable Navbar component"
+```
+
+---
+
+### Task 8b: Create PrivateLayout Component
+
+**Files:**
+- Create: `src/components/layout/PrivateLayout.jsx`
+
+- [ ] **Step 1: Create PrivateLayout wrapper**
+
+Create `src/components/layout/PrivateLayout.jsx`:
+
+```jsx
+import Navbar from './Navbar';
+
+export default function PrivateLayout({ children, showAddButton = false }) {
+  return (
+    <div className="min-h-screen bg-base-200">
+      <Navbar showAddButton={showAddButton} />
+      <div className="container mx-auto p-8">
+        {children}
+      </div>
+    </div>
+  );
+}
+```
+
+- [ ] **Step 2: Update Dashboard to use PrivateLayout**
+
+Replace content in `src/pages/Dashboard.jsx`:
+
+```jsx
+import { useNavigate } from 'react-router-dom';
+import { useProperties } from '../hooks/useProperties';
+import { useToast } from '../contexts/ToastContext';
+import Button from '../components/common/Button';
+import PropertyCard from '../components/property/PropertyCard';
+import PrivateLayout from '../components/layout/PrivateLayout';
+
+export default function Dashboard() {
+  const navigate = useNavigate();
+  const { properties, loading, error, deleteProperty } = useProperties();
+  const { showToast } = useToast();
+
+  const handleDeleteProperty = async (propertyId) => {
+    try {
+      await deleteProperty(propertyId);
+      showToast('Property deleted successfully', 'success');
+    } catch (error) {
+      showToast('Failed to delete property', 'error');
+    }
+  };
+
+  return (
+    <PrivateLayout showAddButton>
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold mb-2">Your Properties</h1>
+        <p className="text-base-content/70">
+          {properties.length === 0
+            ? 'Your property portfolio will appear here'
+            : `${properties.length} ${properties.length === 1 ? 'property' : 'properties'} in your portfolio`
+          }
+        </p>
+      </div>
+
+      {error && (
+        <div className="alert alert-error mb-8">
+          <span>{error}</span>
+        </div>
+      )}
+
+      {loading ? (
+        <div className="flex justify-center items-center min-h-[400px]">
+          <span className="loading loading-spinner loading-lg"></span>
+        </div>
+      ) : properties.length === 0 ? (
+        <div className="flex justify-center items-center min-h-[400px]">
+          <div className="text-center">
+            <p className="text-lg mb-4">No properties yet</p>
+            <Button onClick={() => navigate('/property/new')}>
+              Add Your First Property
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {properties.map(property => (
+            <PropertyCard
+              key={property.id}
+              property={property}
+              onDelete={handleDeleteProperty}
+            />
+          ))}
+        </div>
+      )}
+    </PrivateLayout>
+  );
+}
+```
+
+- [ ] **Step 3: Test Dashboard with new layout**
+
+```bash
+npm run dev
+```
+
+Verify navbar appears and Add Property button works
+
+- [ ] **Step 4: Commit**
+
+```bash
+git add .
+git commit -m "feat: create PrivateLayout and refactor Dashboard to use it"
 ```
 
 ---
@@ -2790,14 +2988,14 @@ git commit -m "feat: create PropertyCard component for portfolio display"
 
 ---
 
-### Task 17: Update Dashboard with Property List
+### Task 17: Add Property Loading to Dashboard
 
 **Files:**
 - Modify: `src/pages/Dashboard.jsx`
 
-- [ ] **Step 1: Update Dashboard to show properties**
+- [ ] **Step 1: Add property loading and display to Dashboard**
 
-Replace `src/pages/Dashboard.jsx`:
+Update `src/pages/Dashboard.jsx` to add property management:
 
 ```jsx
 import { useNavigate } from 'react-router-dom';
@@ -2946,63 +3144,13 @@ git commit -m "feat: update dashboard to display property portfolio"
 Create `src/pages/AddProperty.jsx`:
 
 ```jsx
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
 import PropertyForm from '../components/property/PropertyForm';
-import Button from '../components/common/Button';
+import PrivateLayout from '../components/layout/PrivateLayout';
 
 export default function AddProperty() {
-  const navigate = useNavigate();
-  const { user, signOut } = useAuth();
-
-  const handleSignOut = async () => {
-    try {
-      await signOut();
-      navigate('/');
-    } catch (error) {
-      console.error('Error signing out:', error);
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-base-200">
-      {/* Navbar */}
-      <div className="navbar bg-base-100 shadow-lg">
-        <div className="flex-1">
-          <span
-            className="text-xl font-bold px-4 cursor-pointer"
-            onClick={() => navigate('/dashboard')}
-          >
-            RE Investor Tools
-          </span>
-        </div>
-        <div className="flex-none gap-2">
-          <div className="dropdown dropdown-end">
-            <label tabIndex={0} className="btn btn-ghost btn-circle avatar">
-              <div className="w-10 rounded-full">
-                {user?.photoURL ? (
-                  <img src={user.photoURL} alt={user.displayName} />
-                ) : (
-                  <div className="bg-neutral-focus text-neutral-content rounded-full w-10 h-10 flex items-center justify-center">
-                    {user?.email?.[0].toUpperCase()}
-                  </div>
-                )}
-              </div>
-            </label>
-            <ul tabIndex={0} className="mt-3 p-2 shadow menu menu-compact dropdown-content bg-base-100 rounded-box w-52">
-              <li className="menu-title">
-                <span>{user?.email}</span>
-              </li>
-              <li>
-                <button onClick={handleSignOut}>Logout</button>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="container mx-auto p-8 max-w-4xl">
+    <PrivateLayout>
+      <div className="max-w-4xl mx-auto">
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">Add New Property</h1>
           <p className="text-base-content/70">
@@ -3012,7 +3160,7 @@ export default function AddProperty() {
 
         <PropertyForm />
       </div>
-    </div>
+    </PrivateLayout>
   );
 }
 ```
@@ -3088,13 +3236,272 @@ git commit -m "feat: add property creation page with form"
 
 ---
 
-### Task 19: Create View/Edit Property Page
+### Task 19: Create PropertyDetail Component
+
+**Files:**
+- Create: `src/components/property/PropertyDetail.jsx`
+
+- [ ] **Step 1: Create PropertyDetail component**
+
+Create `src/components/property/PropertyDetail.jsx`:
+
+```jsx
+import { useNavigate } from 'react-router-dom';
+import Button from '../common/Button';
+import { getDealQuality } from '../../utils/calculations';
+import { useToast } from '../../contexts/ToastContext';
+
+export default function PropertyDetail({ property, onDelete }) {
+  const navigate = useNavigate();
+  const { showToast } = useToast();
+  const quality = getDealQuality(property.type, property.calculated);
+
+  const qualityConfig = {
+    good: { badge: 'success', text: 'Good Deal', icon: '✓' },
+    marginal: { badge: 'warning', text: 'Marginal', icon: '⚠' },
+    avoid: { badge: 'error', text: 'Avoid', icon: '✕' },
+  };
+
+  const { badge, text, icon } = qualityConfig[quality] || {};
+
+  const handleDelete = async () => {
+    if (confirm('Are you sure you want to delete this property?')) {
+      try {
+        await onDelete(property.id);
+        showToast('Property deleted successfully', 'success');
+        navigate('/dashboard');
+      } catch (error) {
+        showToast('Failed to delete property', 'error');
+      }
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="card bg-base-100 shadow-xl">
+        <div className="card-body">
+          <div className="flex justify-between items-start">
+            <div>
+              <h2 className="card-title text-2xl">{property.address}</h2>
+              <p className="text-base-content/70 capitalize">{property.type} Property</p>
+            </div>
+            {quality && (
+              <span className={`badge badge-${badge} badge-lg`}>
+                {icon} {text}
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Purchase Details */}
+      <div className="card bg-base-100 shadow-xl">
+        <div className="card-body">
+          <h3 className="card-title">Purchase Details</h3>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <p className="text-base-content/70">Purchase Price</p>
+              <p className="font-semibold">${property.purchasePrice?.toLocaleString()}</p>
+            </div>
+            <div>
+              <p className="text-base-content/70">Down Payment</p>
+              <p className="font-semibold">{property.downPaymentPercent}%</p>
+            </div>
+            <div>
+              <p className="text-base-content/70">Interest Rate</p>
+              <p className="font-semibold">{property.interestRate}%</p>
+            </div>
+            <div>
+              <p className="text-base-content/70">Loan Term</p>
+              <p className="font-semibold">{property.loanTermYears} years</p>
+            </div>
+            {property.closingCosts > 0 && (
+              <div>
+                <p className="text-base-content/70">Closing Costs</p>
+                <p className="font-semibold">${property.closingCosts?.toLocaleString()}</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Type-specific details */}
+      {property.type === 'rental' && (
+        <div className="card bg-base-100 shadow-xl">
+          <div className="card-body">
+            <h3 className="card-title">Rental Details</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-base-content/70">Monthly Rent</p>
+                <p className="font-semibold">${property.monthlyRent?.toLocaleString()}</p>
+              </div>
+              <div>
+                <p className="text-base-content/70">Vacancy Rate</p>
+                <p className="font-semibold">{property.vacancyRate}%</p>
+              </div>
+              <div>
+                <p className="text-base-content/70">Property Tax</p>
+                <p className="font-semibold">${property.propertyTax?.toLocaleString()}/mo</p>
+              </div>
+              <div>
+                <p className="text-base-content/70">Insurance</p>
+                <p className="font-semibold">${property.insurance?.toLocaleString()}/mo</p>
+              </div>
+              {property.hoa > 0 && (
+                <div>
+                  <p className="text-base-content/70">HOA Fees</p>
+                  <p className="font-semibold">${property.hoa?.toLocaleString()}/mo</p>
+                </div>
+              )}
+              <div>
+                <p className="text-base-content/70">Maintenance</p>
+                <p className="font-semibold">${property.maintenance?.toLocaleString()}/mo</p>
+              </div>
+              <div>
+                <p className="text-base-content/70">Property Management</p>
+                <p className="font-semibold">{property.propertyManagement}%</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {property.type === 'flip' && (
+        <div className="card bg-base-100 shadow-xl">
+          <div className="card-body">
+            <h3 className="card-title">Flip Details</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-base-content/70">After Repair Value (ARV)</p>
+                <p className="font-semibold">${property.arv?.toLocaleString()}</p>
+              </div>
+              <div>
+                <p className="text-base-content/70">Repair Costs</p>
+                <p className="font-semibold">${property.repairCosts?.toLocaleString()}</p>
+              </div>
+              <div>
+                <p className="text-base-content/70">Holding Time</p>
+                <p className="font-semibold">{property.holdingTimeMonths} months</p>
+              </div>
+              <div>
+                <p className="text-base-content/70">Selling Costs</p>
+                <p className="font-semibold">${property.sellingCosts?.toLocaleString()}</p>
+              </div>
+              <div>
+                <p className="text-base-content/70">Agent Commission</p>
+                <p className="font-semibold">{property.agentCommission}%</p>
+              </div>
+              <div>
+                <p className="text-base-content/70">Property Tax</p>
+                <p className="font-semibold">${property.propertyTax?.toLocaleString()}/mo</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Deal Metrics */}
+      {property.calculated && (
+        <div className="card bg-base-100 shadow-xl">
+          <div className="card-body">
+            <h3 className="card-title">Deal Metrics</h3>
+            {property.type === 'rental' && (
+              <div className="grid grid-cols-2 gap-4">
+                <div className="stat bg-base-200 rounded-lg p-4">
+                  <div className="stat-title">Monthly Payment</div>
+                  <div className="stat-value text-2xl">
+                    ${property.calculated.monthlyPayment?.toLocaleString()}
+                  </div>
+                </div>
+                <div className="stat bg-base-200 rounded-lg p-4">
+                  <div className="stat-title">Monthly Cash Flow</div>
+                  <div className={`stat-value text-2xl ${
+                    property.calculated.monthlyCashFlow >= 0 ? 'text-success' : 'text-error'
+                  }`}>
+                    ${property.calculated.monthlyCashFlow?.toLocaleString()}
+                  </div>
+                </div>
+                <div className="stat bg-base-200 rounded-lg p-4">
+                  <div className="stat-title">Cap Rate</div>
+                  <div className="stat-value text-2xl">
+                    {property.calculated.capRate?.toFixed(2)}%
+                  </div>
+                </div>
+                <div className="stat bg-base-200 rounded-lg p-4">
+                  <div className="stat-title">Cash-on-Cash Return</div>
+                  <div className="stat-value text-2xl">
+                    {property.calculated.cashOnCashReturn?.toFixed(2)}%
+                  </div>
+                </div>
+              </div>
+            )}
+            {property.type === 'flip' && (
+              <div className="grid grid-cols-2 gap-4">
+                <div className="stat bg-base-200 rounded-lg p-4">
+                  <div className="stat-title">Total Investment</div>
+                  <div className="stat-value text-2xl">
+                    ${property.calculated.totalInvestment?.toLocaleString()}
+                  </div>
+                </div>
+                <div className="stat bg-base-200 rounded-lg p-4">
+                  <div className="stat-title">Potential Profit</div>
+                  <div className={`stat-value text-2xl ${
+                    property.calculated.profit >= 0 ? 'text-success' : 'text-error'
+                  }`}>
+                    ${property.calculated.profit?.toLocaleString()}
+                  </div>
+                </div>
+                <div className="stat bg-base-200 rounded-lg p-4">
+                  <div className="stat-title">ROI</div>
+                  <div className={`stat-value text-2xl ${
+                    property.calculated.roi >= 0 ? 'text-success' : 'text-error'
+                  }`}>
+                    {property.calculated.roi?.toFixed(2)}%
+                  </div>
+                </div>
+                <div className="stat bg-base-200 rounded-lg p-4">
+                  <div className="stat-title">Break-Even ARV</div>
+                  <div className="stat-value text-2xl">
+                    ${property.calculated.breakEvenARV?.toLocaleString()}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Actions */}
+      <div className="flex gap-4 justify-end">
+        <Button variant="ghost" onClick={handleDelete}>
+          Delete Property
+        </Button>
+        <Button onClick={() => navigate(`/property/${property.id}/edit`)}>
+          Edit Property
+        </Button>
+      </div>
+    </div>
+  );
+}
+```
+
+- [ ] **Step 2: Commit**
+
+```bash
+git add .
+git commit -m "feat: create PropertyDetail component for read-only view"
+```
+
+---
+
+### Task 20: Create View/Edit Property Page
 
 **Files:**
 - Create: `src/pages/ViewProperty.jsx`
 - Modify: `src/App.jsx`
 
-- [ ] **Step 1: Create ViewProperty page**
+- [ ] **Step 1: Create ViewProperty page with read-only view**
 
 Create `src/pages/ViewProperty.jsx`:
 
@@ -3104,15 +3511,20 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { useAuth } from '../contexts/AuthContext';
+import { useProperties } from '../hooks/useProperties';
+import PropertyDetail from '../components/property/PropertyDetail';
 import PropertyForm from '../components/property/PropertyForm';
+import PrivateLayout from '../components/layout/PrivateLayout';
 
 export default function ViewProperty() {
-  const { id } = useParams();
+  const { id, mode } = useParams(); // mode can be undefined (view) or 'edit'
   const navigate = useNavigate();
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
+  const { deleteProperty } = useProperties();
   const [property, setProperty] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const isEditMode = mode === 'edit';
 
   useEffect(() => {
     const fetchProperty = async () => {
@@ -3138,94 +3550,64 @@ export default function ViewProperty() {
     fetchProperty();
   }, [user, id]);
 
-  const handleSignOut = async () => {
-    try {
-      await signOut();
-      navigate('/');
-    } catch (error) {
-      console.error('Error signing out:', error);
-    }
-  };
-
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-base-200">
-        <span className="loading loading-spinner loading-lg"></span>
-      </div>
+      <PrivateLayout>
+        <div className="flex justify-center items-center min-h-[400px]">
+          <span className="loading loading-spinner loading-lg"></span>
+        </div>
+      </PrivateLayout>
     );
   }
 
-  if (error) {
+  if (error || !property) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-base-200">
+      <PrivateLayout>
         <div className="text-center">
-          <p className="text-lg text-error mb-4">{error}</p>
+          <p className="text-lg text-error mb-4">{error || 'Property not found'}</p>
           <button className="btn" onClick={() => navigate('/dashboard')}>
             Back to Dashboard
           </button>
         </div>
-      </div>
+      </PrivateLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-base-200">
-      {/* Navbar */}
-      <div className="navbar bg-base-100 shadow-lg">
-        <div className="flex-1">
-          <span
-            className="text-xl font-bold px-4 cursor-pointer"
-            onClick={() => navigate('/dashboard')}
-          >
-            RE Investor Tools
-          </span>
-        </div>
-        <div className="flex-none gap-2">
-          <div className="dropdown dropdown-end">
-            <label tabIndex={0} className="btn btn-ghost btn-circle avatar">
-              <div className="w-10 rounded-full">
-                {user?.photoURL ? (
-                  <img src={user.photoURL} alt={user.displayName} />
-                ) : (
-                  <div className="bg-neutral-focus text-neutral-content rounded-full w-10 h-10 flex items-center justify-center">
-                    {user?.email?.[0].toUpperCase()}
-                  </div>
-                )}
-              </div>
-            </label>
-            <ul tabIndex={0} className="mt-3 p-2 shadow menu menu-compact dropdown-content bg-base-100 rounded-box w-52">
-              <li className="menu-title">
-                <span>{user?.email}</span>
-              </li>
-              <li>
-                <button onClick={handleSignOut}>Logout</button>
-              </li>
-            </ul>
-          </div>
-        </div>
+    <PrivateLayout>
+      <div className="max-w-4xl mx-auto">
+        {isEditMode ? (
+          <>
+            <div className="mb-8">
+              <h1 className="text-3xl font-bold mb-2">Edit Property</h1>
+              <p className="text-base-content/70">{property.address}</p>
+            </div>
+            <PropertyForm initialData={property} propertyId={id} />
+          </>
+        ) : (
+          <PropertyDetail property={property} onDelete={deleteProperty} />
+        )}
       </div>
-
-      {/* Main Content */}
-      <div className="container mx-auto p-8 max-w-4xl">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Edit Property</h1>
-          <p className="text-base-content/70">{property?.address}</p>
-        </div>
-
-        <PropertyForm initialData={property} propertyId={id} />
-      </div>
-    </div>
+    </PrivateLayout>
   );
 }
 ```
 
-- [ ] **Step 2: Add route to App.jsx**
+- [ ] **Step 2: Add routes to App.jsx**
 
-Add this route to `src/App.jsx`:
+Add view and edit routes to `src/App.jsx`:
 
 ```jsx
 <Route
   path="/property/:id"
+  element={
+    <ProtectedRoute>
+      <ViewProperty />
+    </ProtectedRoute>
+  }
+/>
+<Route
+  path="/property/:id/:mode"
   element={
     <ProtectedRoute>
       <ViewProperty />
@@ -3279,6 +3661,14 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/property/:id/:mode"
+              element={
+                <ProtectedRoute>
+                  <ViewProperty />
+                </ProtectedRoute>
+              }
+            />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </BrowserRouter>
@@ -3297,17 +3687,19 @@ npm run dev
 ```
 
 Verify:
-1. Click on property card from dashboard
-2. Property details load
-3. Can edit property values
-4. Calculations update in real-time
-5. Saving updates the property
+1. Click on property card from dashboard → See read-only PropertyDetail view
+2. Property details display correctly with all sections
+3. Click "Edit Property" button → Navigate to edit mode
+4. Can edit property values in edit mode
+5. Calculations update in real-time
+6. Saving updates the property and returns to dashboard
+7. Delete button works from detail view
 
 - [ ] **Step 4: Commit**
 
 ```bash
 git add .
-git commit -m "feat: add view and edit property page"
+git commit -m "feat: add view and edit property pages with read-only detail view"
 ```
 
 ---
@@ -3515,19 +3907,12 @@ Visit the deployment URL and verify:
 6. Can delete properties
 7. Can sign out
 
-- [ ] **Step 6: Push code to GitHub**
+- [ ] **Step 6: Commit and push deployment configuration**
 
 ```bash
-git add .
-git commit -m "chore: add deployment scripts"
+git add package.json
+git commit -m "chore: add deployment scripts and configure production build"
 git push origin main
-```
-
-- [ ] **Step 7: Commit**
-
-```bash
-git add .
-git commit -m "chore: configure production build and deployment"
 ```
 
 ---
