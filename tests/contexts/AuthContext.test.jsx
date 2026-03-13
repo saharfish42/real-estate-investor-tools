@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { AuthProvider, useAuth } from '../../src/contexts/AuthContext';
+import { AuthProvider } from '../../src/contexts/AuthContext';
+import { useAuth } from '../../src/hooks/useAuth';
 
 // Mock Firebase auth functions
 vi.mock('firebase/auth', () => ({
@@ -42,5 +43,17 @@ describe('AuthContext', () => {
     );
 
     expect(screen.getByText('No user')).toBeInTheDocument();
+  });
+
+  it('should throw error when useAuth is used outside AuthProvider', () => {
+    function BadComponent() {
+      useAuth(); // This should throw
+      return <div>Should not render</div>;
+    }
+
+    // Expect the render to throw an error
+    expect(() => {
+      render(<BadComponent />);
+    }).toThrow('useAuth must be used within an AuthProvider');
   });
 });
