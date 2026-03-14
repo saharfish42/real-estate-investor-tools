@@ -189,7 +189,7 @@ export default function PropertyForm({ values, onChange, errors = {} }) {
         <h3 className="text-lg font-semibold mb-3">Monthly Expenses</h3>
         <div className="form-control mb-3">
           <label htmlFor="propertyTax" className="label">
-            <span className="label-text">Property Tax (annual ÷ 12)</span>
+            <span className="label-text">Property Tax (annual)</span>
           </label>
           <input
             id="propertyTax"
@@ -206,7 +206,7 @@ export default function PropertyForm({ values, onChange, errors = {} }) {
 
         <div className="form-control mb-3">
           <label htmlFor="insurance" className="label">
-            <span className="label-text">Insurance (annual ÷ 12)</span>
+            <span className="label-text">Insurance (annual)</span>
           </label>
           <input
             id="insurance"
