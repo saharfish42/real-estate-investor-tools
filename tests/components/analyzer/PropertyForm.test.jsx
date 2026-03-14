@@ -9,8 +9,8 @@ describe('PropertyForm', () => {
     bedrooms: '',
     bathrooms: '',
     purchasePrice: '',
-    closingCosts: '',
-    downPaymentPercent: 20,
+    cashDown: '',
+    initialLoan: '',
     monthlyRent: '',
     expenses: {
       propertyTax: '',
@@ -52,9 +52,6 @@ describe('PropertyForm', () => {
     const onChange = vi.fn();
     render(<PropertyForm values={defaultValues} onChange={onChange} errors={{}} />);
 
-    const downPaymentInput = screen.getByLabelText(/Down Payment/i);
-    expect(downPaymentInput).toHaveValue(20);
-
     const interestRateInput = screen.getByLabelText(/Interest Rate/i);
     expect(interestRateInput).toHaveValue(7);
   });
@@ -71,5 +68,61 @@ describe('PropertyForm', () => {
     expect(onChange.mock.calls[0][0]).toMatchObject({
       address: expect.stringContaining('1')
     });
+  });
+
+  it('should render new purchase detail fields', () => {
+    const mockOnChange = vi.fn();
+    const values = {
+      ...defaultValues,
+      purchasePrice: 256200,
+      cashDown: 44000,
+      initialLoan: 232500
+    };
+
+    render(<PropertyForm values={values} onChange={mockOnChange} />);
+
+    // Should have new fields
+    expect(screen.getByLabelText(/cash down payment/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/initial loan amount/i)).toBeInTheDocument();
+
+    // Should NOT have old fields
+    expect(screen.queryByLabelText(/closing costs/i)).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(/down payment.*%/i)).not.toBeInTheDocument();
+
+    // Should show calculated rehab budget (read-only)
+    const rehabBudget = screen.getByLabelText(/rehab budget/i);
+    expect(rehabBudget).toBeInTheDocument();
+    expect(rehabBudget).toHaveAttribute('readonly');
+    expect(rehabBudget).toHaveValue('20300'); // 232500 + 44000 - 256200
+  });
+
+  it('should call onChange when cash down changes', async () => {
+    const user = userEvent.setup();
+    const mockOnChange = vi.fn();
+    render(<PropertyForm values={defaultValues} onChange={mockOnChange} />);
+
+    const cashDownInput = screen.getByLabelText(/cash down payment/i);
+    await user.type(cashDownInput, '50000');
+
+    expect(mockOnChange).toHaveBeenCalled();
+    // Check that onChange was called with a numeric value for cashDown
+    const calls = mockOnChange.mock.calls;
+    const hasNumericCashDown = calls.some(call => typeof call[0].cashDown === 'number');
+    expect(hasNumericCashDown).toBe(true);
+  });
+
+  it('should call onChange when initial loan changes', async () => {
+    const user = userEvent.setup();
+    const mockOnChange = vi.fn();
+    render(<PropertyForm values={defaultValues} onChange={mockOnChange} />);
+
+    const initialLoanInput = screen.getByLabelText(/initial loan amount/i);
+    await user.type(initialLoanInput, '240000');
+
+    expect(mockOnChange).toHaveBeenCalled();
+    // Check that onChange was called with a numeric value for initialLoan
+    const calls = mockOnChange.mock.calls;
+    const hasNumericInitialLoan = calls.some(call => typeof call[0].initialLoan === 'number');
+    expect(hasNumericInitialLoan).toBe(true);
   });
 });

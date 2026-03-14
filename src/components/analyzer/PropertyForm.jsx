@@ -72,6 +72,7 @@ export default function PropertyForm({ values, onChange, errors = {} }) {
       {/* Purchase Details */}
       <div className="mb-6">
         <h3 className="text-lg font-semibold mb-3">Purchase Details</h3>
+
         <div className="form-control mb-3">
           <label htmlFor="purchasePrice" className="label">
             <span className="label-text">Purchase Price *</span>
@@ -85,7 +86,7 @@ export default function PropertyForm({ values, onChange, errors = {} }) {
               const parsed = parseFloat(e.target.value);
               handleInputChange('purchasePrice', Number.isNaN(parsed) ? '' : parsed);
             }}
-            placeholder="300000"
+            placeholder="256200"
           />
           {errors.purchasePrice && (
             <label className="label">
@@ -95,42 +96,65 @@ export default function PropertyForm({ values, onChange, errors = {} }) {
         </div>
 
         <div className="form-control mb-3">
-          <label htmlFor="closingCosts" className="label">
-            <span className="label-text">Closing Costs</span>
+          <label htmlFor="cashDown" className="label">
+            <span className="label-text">Cash Down Payment *</span>
           </label>
           <input
-            id="closingCosts"
+            id="cashDown"
             type="number"
-            className="input input-bordered w-full"
-            value={values.closingCosts}
+            className={`input input-bordered w-full ${errors.cashDown ? 'input-error' : ''}`}
+            value={values.cashDown}
             onChange={(e) => {
               const parsed = parseFloat(e.target.value);
-              handleInputChange('closingCosts', Number.isNaN(parsed) ? '' : parsed);
+              handleInputChange('cashDown', Number.isNaN(parsed) ? '' : parsed);
             }}
-            placeholder="9000 (3% of purchase price)"
+            placeholder="44000"
           />
+          {errors.cashDown && (
+            <label className="label">
+              <span className="label-text-alt text-error">{errors.cashDown}</span>
+            </label>
+          )}
         </div>
 
         <div className="form-control mb-3">
-          <label htmlFor="downPaymentPercent" className="label">
-            <span className="label-text">Down Payment (%)</span>
+          <label htmlFor="initialLoan" className="label">
+            <span className="label-text">Initial Loan Amount *</span>
           </label>
           <input
-            id="downPaymentPercent"
+            id="initialLoan"
             type="number"
-            className={`input input-bordered w-full ${errors.downPaymentPercent ? 'input-error' : ''}`}
-            value={values.downPaymentPercent}
+            className={`input input-bordered w-full ${errors.initialLoan ? 'input-error' : ''}`}
+            value={values.initialLoan}
             onChange={(e) => {
               const parsed = parseFloat(e.target.value);
-              handleInputChange('downPaymentPercent', Number.isNaN(parsed) ? '' : parsed);
+              handleInputChange('initialLoan', Number.isNaN(parsed) ? '' : parsed);
             }}
-            placeholder="20"
+            placeholder="232500"
           />
-          {errors.downPaymentPercent && (
+          {errors.initialLoan && (
             <label className="label">
-              <span className="label-text-alt text-error">{errors.downPaymentPercent}</span>
+              <span className="label-text-alt text-error">{errors.initialLoan}</span>
             </label>
           )}
+        </div>
+
+        <div className="form-control mb-3">
+          <label htmlFor="rehabBudget" className="label">
+            <span className="label-text">Rehab Budget (calculated)</span>
+          </label>
+          <input
+            id="rehabBudget"
+            type="text"
+            className="input input-bordered w-full bg-base-200"
+            value={((parseFloat(values.initialLoan) || 0) + (parseFloat(values.cashDown) || 0) - (parseFloat(values.purchasePrice) || 0)).toFixed(0)}
+            readOnly
+          />
+          <label className="label">
+            <span className="label-text-alt text-base-content/60">
+              Initial Loan + Cash Down - Purchase Price
+            </span>
+          </label>
         </div>
       </div>
 
