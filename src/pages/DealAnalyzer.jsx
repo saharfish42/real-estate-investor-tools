@@ -174,12 +174,16 @@ export default function DealAnalyzer() {
       newErrors.purchasePrice = 'Purchase price must be greater than 0';
     }
 
-    if (!values.monthlyRent || values.monthlyRent <= 0) {
-      newErrors.monthlyRent = 'Monthly rent must be greater than 0';
+    if (!values.cashDown || values.cashDown <= 0) {
+      newErrors.cashDown = 'Cash down is required and must be greater than 0';
     }
 
-    if (values.downPaymentPercent < 0 || values.downPaymentPercent > 100) {
-      newErrors.downPaymentPercent = 'Down payment must be between 0% and 100%';
+    if (!values.initialLoan || values.initialLoan <= 0) {
+      newErrors.initialLoan = 'Initial loan is required and must be greater than 0';
+    }
+
+    if (!values.monthlyRent || values.monthlyRent <= 0) {
+      newErrors.monthlyRent = 'Monthly rent must be greater than 0';
     }
 
     if (values.financing.interestRate < 0.1 || values.financing.interestRate > 20) {
