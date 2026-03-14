@@ -79,3 +79,35 @@ export function calculateTotalInterest(monthlyPayment, loanAmount, loanTermYears
   const totalPaid = monthlyPayment * loanTermYears * 12;
   return totalPaid - loanAmount;
 }
+
+/**
+ * Calculate rehab budget from loan structure
+ * @param {number} initialLoan - Initial loan amount (may include rehab costs)
+ * @param {number} cashDown - Cash down payment
+ * @param {number} purchasePrice - Property purchase price
+ * @returns {number} Rehab budget (can be negative if user overpaid in cash)
+ */
+export function calculateRehabBudget(initialLoan, cashDown, purchasePrice) {
+  return (initialLoan + cashDown) - purchasePrice;
+}
+
+/**
+ * Calculate cash pulled out on refinance
+ * @param {number|null} refinanceLoan - Refinance loan amount (null if no refinance)
+ * @param {number} initialLoan - Original loan amount
+ * @returns {number} Cash pulled out (can be negative if paid down)
+ */
+export function calculateCashPulledOut(refinanceLoan, initialLoan) {
+  if (!refinanceLoan || refinanceLoan === 0) return 0;
+  return refinanceLoan - initialLoan;
+}
+
+/**
+ * Calculate net cash invested after refinance
+ * @param {number} cashDown - Initial cash down payment
+ * @param {number} cashPulledOut - Cash pulled out on refinance
+ * @returns {number} Net cash still invested (can be negative if pulled out more)
+ */
+export function calculateNetCashInvested(cashDown, cashPulledOut) {
+  return cashDown - cashPulledOut;
+}

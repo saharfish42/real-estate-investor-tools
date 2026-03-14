@@ -5,7 +5,10 @@ import {
   calculateAnnualCashFlow,
   calculateCashOnCashReturn,
   calculateCapRate,
-  calculateTotalInterest
+  calculateTotalInterest,
+  calculateRehabBudget,
+  calculateCashPulledOut,
+  calculateNetCashInvested
 } from '../../src/utils/calculations';
 
 describe('calculateMortgagePayment', () => {
@@ -149,5 +152,63 @@ describe('calculateTotalInterest', () => {
     // Total paid = 1596.45 * 360 = 574,722
     // Total interest = 574,722 - 240,000 = 334,722
     expect(totalInterest).toBeCloseTo(334722, 0);
+  });
+});
+
+describe('BRRRR Calculations', () => {
+  describe('calculateRehabBudget', () => {
+    it('should calculate rehab budget correctly', () => {
+      // Example: Initial Loan $232,500 + Cash Down $44,000 - Purchase Price $256,200 = $20,300
+      expect(calculateRehabBudget(232500, 44000, 256200)).toBe(20300);
+    });
+
+    it('should return 0 when loan + cash equals purchase price', () => {
+      expect(calculateRehabBudget(200000, 50000, 250000)).toBe(0);
+    });
+
+    it('should handle negative rehab budget (user paid more cash)', () => {
+      // User paid $60k cash but only borrowed $190k for $260k property = -$10k
+      expect(calculateRehabBudget(190000, 60000, 260000)).toBe(-10000);
+    });
+  });
+
+  describe('calculateCashPulledOut', () => {
+    it('should calculate cash pulled out on refinance', () => {
+      // Refinance $253,300 - Initial Loan $232,500 = $20,800
+      expect(calculateCashPulledOut(253300, 232500)).toBe(20800);
+    });
+
+    it('should return 0 when no refinance occurred', () => {
+      expect(calculateCashPulledOut(null, 232500)).toBe(0);
+    });
+
+    it('should return 0 when refinance is 0', () => {
+      expect(calculateCashPulledOut(0, 232500)).toBe(0);
+    });
+
+    it('should handle paying down loan on refinance (negative cash out)', () => {
+      // Refinanced to lower amount
+      expect(calculateCashPulledOut(220000, 232500)).toBe(-12500);
+    });
+  });
+
+  describe('calculateNetCashInvested', () => {
+    it('should calculate net cash invested after refinance', () => {
+      // Cash Down $44,000 - Cash Pulled Out $20,800 = $23,200
+      expect(calculateNetCashInvested(44000, 20800)).toBe(23200);
+    });
+
+    it('should return cash down when no cash pulled out', () => {
+      expect(calculateNetCashInvested(44000, 0)).toBe(44000);
+    });
+
+    it('should handle pulling out more than initially invested (negative)', () => {
+      // Pulled out more than down payment = negative net invested
+      expect(calculateNetCashInvested(44000, 50000)).toBe(-6000);
+    });
+
+    it('should handle zero down payment', () => {
+      expect(calculateNetCashInvested(0, 0)).toBe(0);
+    });
   });
 });
