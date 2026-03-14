@@ -23,3 +23,59 @@ export function calculateMortgagePayment(loanAmount, annualInterestRate, loanTer
 
   return numerator / denominator;
 }
+
+/**
+ * Calculate net monthly cash flow
+ * @param {number} monthlyIncome - Total monthly income (rent)
+ * @param {number} monthlyExpenses - Sum of all monthly expenses
+ * @param {number} mortgagePayment - Monthly mortgage payment
+ * @returns {number} Net monthly cash flow (can be negative)
+ */
+export function calculateMonthlyCashFlow(monthlyIncome, monthlyExpenses, mortgagePayment) {
+  return monthlyIncome - monthlyExpenses - mortgagePayment;
+}
+
+/**
+ * Calculate annual cash flow
+ * @param {number} monthlyCashFlow - Net monthly cash flow
+ * @returns {number} Annual cash flow
+ */
+export function calculateAnnualCashFlow(monthlyCashFlow) {
+  return monthlyCashFlow * 12;
+}
+
+/**
+ * Calculate cash-on-cash return
+ * @param {number} annualCashFlow - Net annual cash flow
+ * @param {number} totalCashInvested - Down payment + closing costs
+ * @returns {number} Cash-on-cash return as percentage
+ */
+export function calculateCashOnCashReturn(annualCashFlow, totalCashInvested) {
+  if (totalCashInvested === 0) return 0;
+  return (annualCashFlow / totalCashInvested) * 100;
+}
+
+/**
+ * Calculate cap rate (capitalization rate)
+ * @param {number} annualIncome - Total annual rental income
+ * @param {number} annualExpenses - Total annual expenses (excluding mortgage)
+ * @param {number} purchasePrice - Property purchase price
+ * @returns {number} Cap rate as percentage
+ */
+export function calculateCapRate(annualIncome, annualExpenses, purchasePrice) {
+  if (purchasePrice === 0) return 0;
+  const noi = annualIncome - annualExpenses; // Net Operating Income
+  return (noi / purchasePrice) * 100;
+}
+
+/**
+ * Calculate total interest paid over loan term
+ * @param {number} monthlyPayment - Monthly mortgage payment
+ * @param {number} loanAmount - Original loan amount
+ * @param {number} loanTermYears - Loan term in years
+ * @returns {number} Total interest paid
+ */
+export function calculateTotalInterest(monthlyPayment, loanAmount, loanTermYears) {
+  const totalPaid = monthlyPayment * loanTermYears * 12;
+  return totalPaid - loanAmount;
+}
