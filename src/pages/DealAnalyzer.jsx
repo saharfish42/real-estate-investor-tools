@@ -55,7 +55,13 @@ export default function DealAnalyzer() {
         try {
           const propertyDoc = await getDoc(doc(db, 'properties', propertyId));
           if (propertyDoc.exists() && propertyDoc.data().userId === user.uid) {
-            setValues(propertyDoc.data());
+            const loadedData = propertyDoc.data();
+            setValues({
+              ...DEFAULT_VALUES,
+              ...loadedData,
+              expenses: { ...DEFAULT_VALUES.expenses, ...loadedData.expenses },
+              financing: { ...DEFAULT_VALUES.financing, ...loadedData.financing }
+            });
           } else {
             alert('Property not found or access denied');
             navigate('/properties');
@@ -167,6 +173,11 @@ export default function DealAnalyzer() {
   };
 
   const handleSave = async () => {
+    if (!user) {
+      alert('You must be logged in to save properties.');
+      return;
+    }
+
     if (!validateForm()) return;
 
     setSaving(true);
