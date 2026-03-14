@@ -2,6 +2,19 @@
 import { formatCurrency, formatPercent } from '../../utils/formatters';
 
 export default function AnalysisResults({ calculations }) {
+  if (!calculations) {
+    return (
+      <div className="space-y-6">
+        <h2 className="text-2xl font-bold">Analysis Results</h2>
+        <div className="card bg-base-100 shadow-lg">
+          <div className="card-body">
+            <p className="text-base-content/70">Enter property details to see analysis</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const {
     monthlyIncome,
     monthlyExpenses,
