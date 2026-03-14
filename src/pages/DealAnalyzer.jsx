@@ -34,6 +34,9 @@ const DEFAULT_VALUES = {
   financing: {
     interestRate: 7,
     loanTerm: 30
+  },
+  refinance: {
+    refinanceLoan: ''
   }
 };
 
@@ -60,7 +63,8 @@ export default function DealAnalyzer() {
               ...DEFAULT_VALUES,
               ...loadedData,
               expenses: { ...DEFAULT_VALUES.expenses, ...loadedData.expenses },
-              financing: { ...DEFAULT_VALUES.financing, ...loadedData.financing }
+              financing: { ...DEFAULT_VALUES.financing, ...loadedData.financing },
+              refinance: { ...DEFAULT_VALUES.refinance, ...loadedData.refinance }
             });
           } else {
             alert('Property not found or access denied');
@@ -214,6 +218,9 @@ export default function DealAnalyzer() {
         financing: {
           interestRate: parseFloat(values.financing.interestRate),
           loanTerm: parseInt(values.financing.loanTerm)
+        },
+        refinance: {
+          refinanceLoan: parseFloat(values.refinance.refinanceLoan) || null
         },
         updatedAt: serverTimestamp()
       };

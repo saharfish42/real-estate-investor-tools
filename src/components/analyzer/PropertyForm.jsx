@@ -338,6 +338,76 @@ export default function PropertyForm({ values, onChange, errors = {} }) {
           )}
         </div>
       </div>
+
+      {/* Refinance */}
+      <div className="mb-6">
+        <h3 className="text-lg font-semibold mb-3">Refinance</h3>
+        <div className="form-control mb-3">
+          <label htmlFor="refinanceLoan" className="label">
+            <span className="label-text">Refinance Loan Amount</span>
+          </label>
+          <input
+            id="refinanceLoan"
+            type="number"
+            className="input input-bordered w-full"
+            value={values.refinance.refinanceLoan}
+            onChange={(e) => {
+              const parsed = parseFloat(e.target.value);
+              handleNestedChange('refinance', 'refinanceLoan', Number.isNaN(parsed) ? '' : parsed);
+            }}
+            placeholder="280000"
+          />
+          <label className="label">
+            <span className="label-text-alt text-base-content/60">
+              Optional: Enter if refinancing after initial purchase and rehab
+            </span>
+          </label>
+        </div>
+
+        <div className="form-control mb-3">
+          <label htmlFor="cashPulledOut" className="label">
+            <span className="label-text">Cash Pulled Out (calculated)</span>
+          </label>
+          <input
+            id="cashPulledOut"
+            type="text"
+            className="input input-bordered w-full bg-base-200"
+            value={
+              values.refinance.refinanceLoan
+                ? (parseFloat(values.refinance.refinanceLoan) - (parseFloat(values.initialLoan) || 0)).toFixed(0)
+                : '0'
+            }
+            readOnly
+          />
+          <label className="label">
+            <span className="label-text-alt text-base-content/60">
+              Refinance Loan - Initial Loan
+            </span>
+          </label>
+        </div>
+
+        <div className="form-control mb-3">
+          <label htmlFor="netCashInvested" className="label">
+            <span className="label-text">Net Cash Invested (calculated)</span>
+          </label>
+          <input
+            id="netCashInvested"
+            type="text"
+            className="input input-bordered w-full bg-base-200"
+            value={
+              values.refinance.refinanceLoan
+                ? ((parseFloat(values.cashDown) || 0) - (parseFloat(values.refinance.refinanceLoan) - (parseFloat(values.initialLoan) || 0))).toFixed(0)
+                : (parseFloat(values.cashDown) || 0).toFixed(0)
+            }
+            readOnly
+          />
+          <label className="label">
+            <span className="label-text-alt text-base-content/60">
+              Cash Down - Cash Pulled Out
+            </span>
+          </label>
+        </div>
+      </div>
     </div>
   );
 }

@@ -23,6 +23,9 @@ describe('PropertyForm', () => {
     financing: {
       interestRate: 7,
       loanTerm: 30
+    },
+    refinance: {
+      refinanceLoan: ''
     }
   };
 
@@ -30,12 +33,16 @@ describe('PropertyForm', () => {
     const onChange = vi.fn();
     render(<PropertyForm values={defaultValues} onChange={onChange} errors={{}} />);
 
-    // Check for section headings
-    expect(screen.getByText(/Property Information/i)).toBeInTheDocument();
-    expect(screen.getByText(/Purchase Details/i)).toBeInTheDocument();
-    expect(screen.getByText(/Income/i)).toBeInTheDocument();
-    expect(screen.getByText(/Monthly Expenses/i)).toBeInTheDocument();
-    expect(screen.getByText(/Financing/i)).toBeInTheDocument();
+    // Check for section headings - use more specific matchers for headings
+    const headings = screen.getAllByRole('heading', { level: 3 });
+    const headingTexts = headings.map(h => h.textContent);
+
+    expect(headingTexts).toContain('Property Information');
+    expect(headingTexts).toContain('Purchase Details');
+    expect(headingTexts).toContain('Income');
+    expect(headingTexts).toContain('Monthly Expenses');
+    expect(headingTexts).toContain('Financing');
+    expect(headingTexts).toContain('Refinance');
   });
 
   it('should render required input fields', () => {
@@ -124,5 +131,96 @@ describe('PropertyForm', () => {
     const calls = mockOnChange.mock.calls;
     const hasNumericInitialLoan = calls.some(call => typeof call[0].initialLoan === 'number');
     expect(hasNumericInitialLoan).toBe(true);
+  });
+
+  it('should render refinance section with refinance loan input', () => {
+    const mockOnChange = vi.fn();
+    render(<PropertyForm values={defaultValues} onChange={mockOnChange} />);
+
+    expect(screen.getByLabelText(/refinance loan/i)).toBeInTheDocument();
+  });
+
+  it('should call onChange when refinance loan changes', async () => {
+    const user = userEvent.setup();
+    const mockOnChange = vi.fn();
+    render(<PropertyForm values={defaultValues} onChange={mockOnChange} />);
+
+    const refinanceLoanInput = screen.getByLabelText(/refinance loan/i);
+    await user.type(refinanceLoanInput, '280000');
+
+    expect(mockOnChange).toHaveBeenCalled();
+    const calls = mockOnChange.mock.calls;
+    const hasNumericRefinanceLoan = calls.some(call => typeof call[0].refinance?.refinanceLoan === 'number');
+    expect(hasNumericRefinanceLoan).toBe(true);
+  });
+
+  it('should calculate cash pulled out correctly', () => {
+    const mockOnChange = vi.fn();
+    const values = {
+      ...defaultValues,
+      initialLoan: 232500,
+      refinance: {
+        refinanceLoan: 280000
+      }
+    };
+
+    render(<PropertyForm values={values} onChange={mockOnChange} />);
+
+    const cashPulledOutField = screen.getByLabelText(/cash pulled out/i);
+    expect(cashPulledOutField).toBeInTheDocument();
+    expect(cashPulledOutField).toHaveAttribute('readonly');
+    expect(cashPulledOutField).toHaveValue('47500'); // 280000 - 232500
+  });
+
+  it('should show zero cash pulled out when refinance loan is not provided', () => {
+    const mockOnChange = vi.fn();
+    const values = {
+      ...defaultValues,
+      initialLoan: 232500,
+      refinance: {
+        refinanceLoan: ''
+      }
+    };
+
+    render(<PropertyForm values={values} onChange={mockOnChange} />);
+
+    const cashPulledOutField = screen.getByLabelText(/cash pulled out/i);
+    expect(cashPulledOutField).toHaveValue('0');
+  });
+
+  it('should calculate net cash invested correctly', () => {
+    const mockOnChange = vi.fn();
+    const values = {
+      ...defaultValues,
+      cashDown: 44000,
+      initialLoan: 232500,
+      refinance: {
+        refinanceLoan: 280000
+      }
+    };
+
+    render(<PropertyForm values={values} onChange={mockOnChange} />);
+
+    const netCashInvestedField = screen.getByLabelText(/net cash invested/i);
+    expect(netCashInvestedField).toBeInTheDocument();
+    expect(netCashInvestedField).toHaveAttribute('readonly');
+    expect(netCashInvestedField).toHaveValue('-3500'); // 44000 - 47500
+  });
+
+  it('should show original cash down as net cash invested when no refinance', () => {
+    const mockOnChange = vi.fn();
+    const values = {
+      ...defaultValues,
+      cashDown: 44000,
+      initialLoan: 232500,
+      refinance: {
+        refinanceLoan: ''
+      }
+    };
+
+    render(<PropertyForm values={values} onChange={mockOnChange} />);
+
+    const netCashInvestedField = screen.getByLabelText(/net cash invested/i);
+    expect(netCashInvestedField).toHaveValue('44000'); // 44000 - 0
   });
 });
