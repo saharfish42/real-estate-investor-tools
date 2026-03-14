@@ -10,6 +10,7 @@ export default function Dashboard() {
       await signOut();
     } catch (error) {
       console.error('Error signing out:', error);
+      alert('Failed to sign out. Please try again.');
     }
   };
 
@@ -21,13 +22,13 @@ export default function Dashboard() {
         </div>
         <div className="flex-none gap-2">
           <div className="dropdown dropdown-end">
-            <label tabIndex={0} className="btn btn-ghost btn-circle avatar">
+            <label tabIndex={0} className="btn btn-ghost btn-circle avatar" aria-label="User menu">
               <div className="w-10 rounded-full">
                 {user?.photoURL ? (
                   <img src={user.photoURL} alt={user.displayName} />
                 ) : (
                   <div className="bg-neutral-focus text-neutral-content rounded-full w-10 h-10 flex items-center justify-center">
-                    {user?.email?.[0].toUpperCase()}
+                    {user?.email?.[0]?.toUpperCase() || '?'}
                   </div>
                 )}
               </div>
