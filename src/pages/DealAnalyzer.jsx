@@ -210,6 +210,8 @@ export default function DealAnalyzer() {
     try {
       const monthlyRent = parseFloat(values.monthlyRent) || 0;
       const purchasePrice = parseFloat(values.purchasePrice) || 0;
+      const cashDown = parseFloat(values.cashDown) || 0;
+      const initialLoan = parseFloat(values.initialLoan) || 0;
       const managementPercent = parseFloat(values.expenses.managementPercent) || 0;
       const maintenancePercent = parseFloat(values.expenses.maintenancePercent) || 0;
       const vacancyPercent = parseFloat(values.expenses.vacancyPercent) || 0;
@@ -218,9 +220,8 @@ export default function DealAnalyzer() {
         ...values,
         userId: user.uid,
         purchasePrice: purchasePrice,
-        closingCosts: calculations.closingCosts,
-        downPayment: calculations.downPayment,
-        downPaymentPercent: parseFloat(values.downPaymentPercent),
+        cashDown: cashDown,
+        initialLoan: initialLoan,
         monthlyRent: monthlyRent,
         expenses: {
           propertyTax: parseFloat(values.expenses.propertyTax) || 0,
