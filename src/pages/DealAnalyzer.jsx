@@ -12,7 +12,10 @@ import {
   calculateAnnualCashFlow,
   calculateCashOnCashReturn,
   calculateCapRate,
-  calculateTotalInterest
+  calculateTotalInterest,
+  calculateRehabBudget,
+  calculateCashPulledOut,
+  calculateNetCashInvested
 } from '../utils/calculations';
 
 const DEFAULT_VALUES = {
@@ -86,16 +89,25 @@ export default function DealAnalyzer() {
   const calculations = useMemo(() => {
     const purchasePrice = parseFloat(values.purchasePrice) || 0;
     const monthlyRent = parseFloat(values.monthlyRent) || 0;
-    const downPaymentPercent = parseFloat(values.downPaymentPercent) || 0;
-    const closingCosts = parseFloat(values.closingCosts) || (purchasePrice * 0.03);
+    const cashDown = parseFloat(values.cashDown) || 0;
+    const initialLoan = parseFloat(values.initialLoan) || 0;
+    const refinanceLoan = parseFloat(values.refinance.refinanceLoan) || null;
 
-    // Calculate down payment and loan amount
-    const downPayment = purchasePrice * (downPaymentPercent / 100);
-    const loanAmount = purchasePrice - downPayment;
+    // Determine active loan amount (refinance takes precedence)
+    const loanAmount = refinanceLoan || initialLoan;
 
-    // Calculate expenses
-    const propertyTax = parseFloat(values.expenses.propertyTax) || 0;
-    const insurance = parseFloat(values.expenses.insurance) || 0;
+    // Calculate BRRRR metrics
+    const rehabBudget = calculateRehabBudget(initialLoan, cashDown, purchasePrice);
+    const cashPulledOut = calculateCashPulledOut(refinanceLoan, initialLoan);
+    const netCashInvested = calculateNetCashInvested(cashDown, cashPulledOut);
+
+    // Calculate expenses (annual values divided by 12)
+    const annualPropertyTax = parseFloat(values.expenses.propertyTax) || 0;
+    const propertyTax = annualPropertyTax / 12;
+
+    const annualInsurance = parseFloat(values.expenses.insurance) || 0;
+    const insurance = annualInsurance / 12;
+
     const hoa = parseFloat(values.expenses.hoa) || 0;
 
     const managementPercent = parseFloat(values.expenses.managementPercent) || 0;
@@ -118,8 +130,8 @@ export default function DealAnalyzer() {
     const monthlyCashFlow = calculateMonthlyCashFlow(monthlyRent, monthlyExpenses, mortgagePayment);
     const annualCashFlow = calculateAnnualCashFlow(monthlyCashFlow);
 
-    // Calculate ROI metrics
-    const totalCashInvested = downPayment + closingCosts;
+    // Calculate ROI metrics (use netCashInvested if refinanced, otherwise cashDown)
+    const totalCashInvested = refinanceLoan ? netCashInvested : cashDown;
     const cashOnCashReturn = calculateCashOnCashReturn(annualCashFlow, totalCashInvested);
 
     const annualIncome = monthlyRent * 12;
@@ -144,8 +156,10 @@ export default function DealAnalyzer() {
       loanAmount,
       totalInterest,
       totalPaid,
-      downPayment,
-      closingCosts
+      cashDown,
+      rehabBudget,
+      cashPulledOut,
+      netCashInvested
     };
   }, [values]);
 
