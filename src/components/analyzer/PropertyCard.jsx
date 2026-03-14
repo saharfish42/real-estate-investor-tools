@@ -10,22 +10,32 @@ export default function PropertyCard({ property, onEdit, onDelete }) {
     address,
     purchasePrice,
     monthlyRent,
-    downPayment,
+    cashDown,
+    downPayment, // Legacy field for backwards compatibility
+    initialLoan,
+    refinance,
     expenses,
     financing
   } = property;
 
   // Calculate monthly cash flow for display
-  const loanAmount = purchasePrice - downPayment;
+  // Use refinance loan if present, otherwise initial loan
+  // Fall back to calculated value for legacy properties
+  const activeLoan = refinance?.refinanceLoan || initialLoan || (purchasePrice - (cashDown || downPayment || 0));
   const mortgagePayment = calculateMortgagePayment(
-    loanAmount,
+    activeLoan,
     financing.interestRate,
     financing.loanTerm
   );
 
-  const monthlyExpenses = Object.values(expenses).reduce((sum, val) => {
-    return sum + (parseFloat(val) || 0);
-  }, 0);
+  // Sum only the dollar amount fields, not the percentage fields
+  const monthlyExpenses =
+    (parseFloat(expenses.propertyTax) || 0) +
+    (parseFloat(expenses.insurance) || 0) +
+    (parseFloat(expenses.hoa) || 0) +
+    (parseFloat(expenses.management) || 0) +
+    (parseFloat(expenses.maintenance) || 0) +
+    (parseFloat(expenses.vacancy) || 0);
 
   const cashFlow = calculateMonthlyCashFlow(
     monthlyRent,
