@@ -54,4 +54,20 @@ describe('App Routing', () => {
     expect(screen.getByText('Real Estate Investor Tools')).toBeInTheDocument();
     expect(screen.getByText(/Analyze deals, calculate ROI/i)).toBeInTheDocument();
   });
+
+  it('should redirect to login when accessing /analyzer without auth', () => {
+    window.history.pushState({}, '', '/analyzer');
+    render(<App />);
+
+    // Should redirect to login page
+    expect(screen.getByText(/Sign in to analyze deals/i)).toBeInTheDocument();
+  });
+
+  it('should redirect to login when accessing /properties without auth', () => {
+    window.history.pushState({}, '', '/properties');
+    render(<App />);
+
+    // Should redirect to login page
+    expect(screen.getByText(/Sign in to analyze deals/i)).toBeInTheDocument();
+  });
 });

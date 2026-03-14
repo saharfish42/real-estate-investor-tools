@@ -4,6 +4,8 @@ import ProtectedRoute from './components/auth/ProtectedRoute';
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import Dashboard from './pages/Dashboard';
+import DealAnalyzer from './pages/DealAnalyzer';
+import MyProperties from './pages/MyProperties';
 
 function App() {
   return (
@@ -17,6 +19,22 @@ function App() {
             element={
               <ProtectedRoute>
                 <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/analyzer"
+            element={
+              <ProtectedRoute>
+                <DealAnalyzer />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/properties"
+            element={
+              <ProtectedRoute>
+                <MyProperties />
               </ProtectedRoute>
             }
           />
