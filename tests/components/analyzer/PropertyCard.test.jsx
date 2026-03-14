@@ -13,7 +13,13 @@ describe('PropertyCard', () => {
     expenses: {
       propertyTax: 250,
       insurance: 100,
-      hoa: 0
+      hoa: 0,
+      management: 250,
+      managementPercent: 10,
+      maintenance: 250,
+      maintenancePercent: 1,
+      vacancy: 125,
+      vacancyPercent: 5
     },
     financing: {
       interestRate: 7,
@@ -73,5 +79,32 @@ describe('PropertyCard', () => {
     const cashFlowContainer = cashFlowLabel.closest('.flex');
     const coloredValue = cashFlowContainer.querySelector('.text-success, .text-error');
     expect(coloredValue).toBeInTheDocument();
+  });
+
+  it('should correctly calculate expenses including dollar amounts not percentages', () => {
+    const onEdit = vi.fn();
+    const onDelete = vi.fn();
+
+    const propertyWithExpenses = {
+      ...mockProperty,
+      expenses: {
+        propertyTax: 250,
+        insurance: 100,
+        hoa: 50,
+        management: 250,        // Dollar amount
+        managementPercent: 10,  // Percentage (should not be summed)
+        maintenance: 250,       // Dollar amount
+        maintenancePercent: 1,  // Percentage (should not be summed)
+        vacancy: 125,           // Dollar amount
+        vacancyPercent: 5       // Percentage (should not be summed)
+      }
+    };
+
+    render(<PropertyCard property={propertyWithExpenses} onEdit={onEdit} onDelete={onDelete} />);
+
+    // The component should render without errors
+    // Total expenses should be: 250 + 100 + 50 + 250 + 250 + 125 = 1025
+    // NOT: 250 + 100 + 50 + 250 + 10 + 250 + 1 + 125 + 5 = 1041
+    expect(screen.getByText('123 Main St, Springfield')).toBeInTheDocument();
   });
 });

@@ -168,6 +168,10 @@ export default function DealAnalyzer() {
       newErrors.interestRate = 'Interest rate must be between 0.1% and 20%';
     }
 
+    if (values.financing.loanTerm < 1 || values.financing.loanTerm > 50) {
+      newErrors.loanTerm = 'Loan term must be between 1 and 50 years';
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -182,21 +186,30 @@ export default function DealAnalyzer() {
 
     setSaving(true);
     try {
+      const monthlyRent = parseFloat(values.monthlyRent) || 0;
+      const purchasePrice = parseFloat(values.purchasePrice) || 0;
+      const managementPercent = parseFloat(values.expenses.managementPercent) || 0;
+      const maintenancePercent = parseFloat(values.expenses.maintenancePercent) || 0;
+      const vacancyPercent = parseFloat(values.expenses.vacancyPercent) || 0;
+
       const propertyData = {
         ...values,
         userId: user.uid,
-        purchasePrice: parseFloat(values.purchasePrice),
+        purchasePrice: purchasePrice,
         closingCosts: calculations.closingCosts,
         downPayment: calculations.downPayment,
         downPaymentPercent: parseFloat(values.downPaymentPercent),
-        monthlyRent: parseFloat(values.monthlyRent),
+        monthlyRent: monthlyRent,
         expenses: {
           propertyTax: parseFloat(values.expenses.propertyTax) || 0,
           insurance: parseFloat(values.expenses.insurance) || 0,
           hoa: parseFloat(values.expenses.hoa) || 0,
-          managementPercent: parseFloat(values.expenses.managementPercent),
-          maintenancePercent: parseFloat(values.expenses.maintenancePercent),
-          vacancyPercent: parseFloat(values.expenses.vacancyPercent)
+          management: (monthlyRent * managementPercent) / 100,
+          managementPercent: managementPercent,
+          maintenance: (purchasePrice * maintenancePercent) / 100 / 12,
+          maintenancePercent: maintenancePercent,
+          vacancy: (monthlyRent * vacancyPercent) / 100,
+          vacancyPercent: vacancyPercent
         },
         financing: {
           interestRate: parseFloat(values.financing.interestRate),

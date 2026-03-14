@@ -299,7 +299,7 @@ export default function PropertyForm({ values, onChange, errors = {} }) {
           <input
             id="loanTerm"
             type="number"
-            className="input input-bordered w-full"
+            className={`input input-bordered w-full ${errors.loanTerm ? 'input-error' : ''}`}
             value={values.financing.loanTerm}
             onChange={(e) => {
               const parsed = parseInt(e.target.value);
@@ -307,6 +307,11 @@ export default function PropertyForm({ values, onChange, errors = {} }) {
             }}
             placeholder="30"
           />
+          {errors.loanTerm && (
+            <label className="label">
+              <span className="label-text-alt text-error">{errors.loanTerm}</span>
+            </label>
+          )}
         </div>
       </div>
     </div>

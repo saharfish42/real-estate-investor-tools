@@ -51,4 +51,32 @@ describe('DealAnalyzer', () => {
     // Should show validation errors
     expect(screen.getByText(/Address is required/i)).toBeInTheDocument();
   });
+
+  it('should validate loan term is between 1 and 50 years', async () => {
+    const user = userEvent.setup();
+    render(
+      <BrowserRouter>
+        <DealAnalyzer />
+      </BrowserRouter>
+    );
+
+    // Find the loan term input
+    const loanTermInput = screen.getByLabelText(/Loan Term/i);
+
+    // Test loan term less than 1
+    await user.clear(loanTermInput);
+    await user.type(loanTermInput, '0');
+
+    const saveButton = screen.getByRole('button', { name: /Save Property/i });
+    await user.click(saveButton);
+
+    expect(screen.getByText(/Loan term must be between 1 and 50 years/i)).toBeInTheDocument();
+
+    // Test loan term greater than 50
+    await user.clear(loanTermInput);
+    await user.type(loanTermInput, '51');
+    await user.click(saveButton);
+
+    expect(screen.getByText(/Loan term must be between 1 and 50 years/i)).toBeInTheDocument();
+  });
 });
