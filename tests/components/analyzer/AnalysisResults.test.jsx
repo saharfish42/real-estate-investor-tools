@@ -165,3 +165,39 @@ describe('AnalysisResults - Task 9: Investment Summary Card', () => {
     expect(investmentSummaryIndex).toBeLessThan(monthlyCashFlowIndex);
   });
 });
+
+describe('AnalysisResults - Task 10: Financing Details Card', () => {
+  const mockCalculations = {
+    monthlyIncome: 2500,
+    monthlyExpenses: 975,
+    mortgagePayment: 1596.45,
+    monthlyCashFlow: -71.45,
+    annualCashFlow: -857.4,
+    totalCashInvested: 10000,
+    cashOnCashReturn: -8.57,
+    noi: 18300,
+    capRate: 6.1,
+    loanAmount: 240000,
+    totalInterest: 334722,
+    totalPaid: 574722,
+    purchasePrice: 250000,
+    cashDown: 50000,
+    initialLoan: 200000,
+    rehabBudget: 20000,
+    cashPulledOut: 40000,
+    netCashInvested: 10000
+  };
+
+  it('should display "Active Loan Amount" label instead of "Loan Amount"', () => {
+    render(<AnalysisResults calculations={mockCalculations} />);
+    expect(screen.getByText(/Active Loan Amount:/i)).toBeInTheDocument();
+    expect(screen.queryByText(/^Loan Amount:/i)).not.toBeInTheDocument();
+  });
+
+  it('should display active loan amount value', () => {
+    render(<AnalysisResults calculations={mockCalculations} />);
+    expect(screen.getByText(/Active Loan Amount:/i)).toBeInTheDocument();
+    const activeLoanElements = screen.getAllByText('$240,000.00');
+    expect(activeLoanElements.length).toBeGreaterThan(0);
+  });
+});

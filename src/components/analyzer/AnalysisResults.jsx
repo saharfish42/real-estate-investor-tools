@@ -153,7 +153,7 @@ export default function AnalysisResults({ calculations }) {
           <h3 className="card-title">Financing Details</h3>
           <div className="space-y-2">
             <div className="flex justify-between">
-              <span className="text-base-content/70">Loan Amount:</span>
+              <span className="text-base-content/70">Active Loan Amount:</span>
               <span className="font-semibold">{formatCurrency(loanAmount)}</span>
             </div>
             <div className="flex justify-between">
