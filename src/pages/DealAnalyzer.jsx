@@ -20,8 +20,8 @@ const DEFAULT_VALUES = {
   bedrooms: '',
   bathrooms: '',
   purchasePrice: '',
-  closingCosts: '',
-  downPaymentPercent: 20,
+  cashDown: '',
+  initialLoan: '',
   monthlyRent: '',
   expenses: {
     propertyTax: '',
