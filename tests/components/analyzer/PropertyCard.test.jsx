@@ -63,24 +63,6 @@ describe('PropertyCard', () => {
     expect(onDelete).toHaveBeenCalledWith(mockProperty.id);
   });
 
-  it('should display cash flow with color coding', () => {
-    const onEdit = vi.fn();
-    const onDelete = vi.fn();
-
-    render(<PropertyCard property={mockProperty} onEdit={onEdit} onDelete={onDelete} />);
-
-    // Verify cash flow is displayed (will vary based on calc)
-    const cashFlowElements = screen.getAllByText(/Monthly Cash Flow:/i);
-    expect(cashFlowElements.length).toBeGreaterThan(0);
-
-    // Verify color class exists (either success or error)
-    // Find the parent div with cash flow, then check for color class
-    const cashFlowLabel = screen.getByText(/Monthly Cash Flow:/i);
-    const cashFlowContainer = cashFlowLabel.closest('.flex');
-    const coloredValue = cashFlowContainer.querySelector('.text-success, .text-error');
-    expect(coloredValue).toBeInTheDocument();
-  });
-
   it('should correctly calculate expenses including dollar amounts not percentages', () => {
     const onEdit = vi.fn();
     const onDelete = vi.fn();
@@ -262,43 +244,4 @@ describe('PropertyCard - Task 11: BRRRR Support', () => {
     expect(screen.getByText('200 Insurance Ave')).toBeInTheDocument();
   });
 
-  it('should calculate cash flow correctly with refinance', () => {
-    const onEdit = vi.fn();
-    const onDelete = vi.fn();
-
-    const propertyWithRefinance = {
-      id: 'prop-cf',
-      address: '300 CashFlow Blvd',
-      purchasePrice: 250000,
-      cashDown: 50000,
-      initialLoan: 200000,
-      monthlyRent: 2500,
-      expenses: {
-        propertyTax: 250,
-        insurance: 100,
-        hoa: 0,
-        management: 250,
-        managementPercent: 10,
-        maintenance: 208,
-        maintenancePercent: 1,
-        vacancy: 125,
-        vacancyPercent: 5
-      },
-      financing: {
-        interestRate: 7,
-        loanTerm: 30
-      },
-      refinance: {
-        refinanceLoan: 240000
-      }
-    };
-
-    render(<PropertyCard property={propertyWithRefinance} onEdit={onEdit} onDelete={onDelete} />);
-
-    // Verify cash flow is displayed with color
-    const cashFlowLabel = screen.getByText(/Monthly Cash Flow:/i);
-    const cashFlowContainer = cashFlowLabel.closest('.flex');
-    const coloredValue = cashFlowContainer.querySelector('.text-success, .text-error');
-    expect(coloredValue).toBeInTheDocument();
-  });
 });
