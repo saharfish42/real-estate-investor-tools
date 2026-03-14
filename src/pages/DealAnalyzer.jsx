@@ -156,7 +156,9 @@ export default function DealAnalyzer() {
       loanAmount,
       totalInterest,
       totalPaid,
+      purchasePrice,
       cashDown,
+      initialLoan,
       rehabBudget,
       cashPulledOut,
       netCashInvested

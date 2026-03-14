@@ -27,14 +27,64 @@ export default function AnalysisResults({ calculations }) {
     capRate,
     loanAmount,
     totalInterest,
-    totalPaid
+    totalPaid,
+    purchasePrice,
+    cashDown,
+    initialLoan,
+    rehabBudget,
+    cashPulledOut,
+    netCashInvested
   } = calculations;
 
   const cashFlowColor = monthlyCashFlow >= 0 ? 'text-success' : 'text-error';
+  const hasRefinance = cashPulledOut > 0;
 
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold">Analysis Results</h2>
+
+      {/* Investment Summary Card */}
+      <div className="card bg-base-100 shadow-lg">
+        <div className="card-body">
+          <h3 className="card-title">Investment Summary</h3>
+          <div className="space-y-2">
+            <div className="flex justify-between">
+              <span className="text-base-content/70">Purchase Price:</span>
+              <span className="font-semibold">{formatCurrency(purchasePrice)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-base-content/70">Cash Down:</span>
+              <span className="font-semibold">{formatCurrency(cashDown)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-base-content/70">Initial Loan:</span>
+              <span className="font-semibold">{formatCurrency(initialLoan)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-base-content/70">Rehab Budget:</span>
+              <span className="font-semibold">{formatCurrency(rehabBudget)}</span>
+            </div>
+            {hasRefinance && (
+              <>
+                <div className="divider my-1"></div>
+                <div className="flex justify-between">
+                  <span className="text-base-content/70">Refinance Loan:</span>
+                  <span className="font-semibold">{formatCurrency(loanAmount)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-base-content/70">Cash Pulled Out:</span>
+                  <span className="font-semibold">{formatCurrency(cashPulledOut)}</span>
+                </div>
+                <div className="divider my-1"></div>
+                <div className="flex justify-between">
+                  <span className="font-bold">Net Cash Invested:</span>
+                  <span className="font-bold">{formatCurrency(netCashInvested)}</span>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
 
       {/* Monthly Cash Flow Card */}
       <div className="card bg-base-100 shadow-lg">
