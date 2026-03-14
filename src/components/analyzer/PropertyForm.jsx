@@ -1,5 +1,3 @@
-import { useState } from 'react';
-
 export default function PropertyForm({ values, onChange, errors = {} }) {
   const handleInputChange = (field, value) => {
     onChange({ ...values, [field]: value });
@@ -83,7 +81,10 @@ export default function PropertyForm({ values, onChange, errors = {} }) {
             type="number"
             className={`input input-bordered w-full ${errors.purchasePrice ? 'input-error' : ''}`}
             value={values.purchasePrice}
-            onChange={(e) => handleInputChange('purchasePrice', parseFloat(e.target.value) || '')}
+            onChange={(e) => {
+              const parsed = parseFloat(e.target.value);
+              handleInputChange('purchasePrice', Number.isNaN(parsed) ? '' : parsed);
+            }}
             placeholder="300000"
           />
           {errors.purchasePrice && (
@@ -102,7 +103,10 @@ export default function PropertyForm({ values, onChange, errors = {} }) {
             type="number"
             className="input input-bordered w-full"
             value={values.closingCosts}
-            onChange={(e) => handleInputChange('closingCosts', parseFloat(e.target.value) || '')}
+            onChange={(e) => {
+              const parsed = parseFloat(e.target.value);
+              handleInputChange('closingCosts', Number.isNaN(parsed) ? '' : parsed);
+            }}
             placeholder="9000 (3% of purchase price)"
           />
         </div>
@@ -116,7 +120,10 @@ export default function PropertyForm({ values, onChange, errors = {} }) {
             type="number"
             className={`input input-bordered w-full ${errors.downPaymentPercent ? 'input-error' : ''}`}
             value={values.downPaymentPercent}
-            onChange={(e) => handleInputChange('downPaymentPercent', parseFloat(e.target.value) || '')}
+            onChange={(e) => {
+              const parsed = parseFloat(e.target.value);
+              handleInputChange('downPaymentPercent', Number.isNaN(parsed) ? '' : parsed);
+            }}
             placeholder="20"
           />
           {errors.downPaymentPercent && (
@@ -139,7 +146,10 @@ export default function PropertyForm({ values, onChange, errors = {} }) {
             type="number"
             className={`input input-bordered w-full ${errors.monthlyRent ? 'input-error' : ''}`}
             value={values.monthlyRent}
-            onChange={(e) => handleInputChange('monthlyRent', parseFloat(e.target.value) || '')}
+            onChange={(e) => {
+              const parsed = parseFloat(e.target.value);
+              handleInputChange('monthlyRent', Number.isNaN(parsed) ? '' : parsed);
+            }}
             placeholder="2500"
           />
           {errors.monthlyRent && (
@@ -162,7 +172,10 @@ export default function PropertyForm({ values, onChange, errors = {} }) {
             type="number"
             className="input input-bordered w-full"
             value={values.expenses.propertyTax}
-            onChange={(e) => handleNestedChange('expenses', 'propertyTax', parseFloat(e.target.value) || '')}
+            onChange={(e) => {
+              const parsed = parseFloat(e.target.value);
+              handleNestedChange('expenses', 'propertyTax', Number.isNaN(parsed) ? '' : parsed);
+            }}
             placeholder="250"
           />
         </div>
@@ -176,7 +189,10 @@ export default function PropertyForm({ values, onChange, errors = {} }) {
             type="number"
             className="input input-bordered w-full"
             value={values.expenses.insurance}
-            onChange={(e) => handleNestedChange('expenses', 'insurance', parseFloat(e.target.value) || '')}
+            onChange={(e) => {
+              const parsed = parseFloat(e.target.value);
+              handleNestedChange('expenses', 'insurance', Number.isNaN(parsed) ? '' : parsed);
+            }}
             placeholder="100"
           />
         </div>
@@ -190,7 +206,10 @@ export default function PropertyForm({ values, onChange, errors = {} }) {
             type="number"
             className="input input-bordered w-full"
             value={values.expenses.hoa}
-            onChange={(e) => handleNestedChange('expenses', 'hoa', parseFloat(e.target.value) || '')}
+            onChange={(e) => {
+              const parsed = parseFloat(e.target.value);
+              handleNestedChange('expenses', 'hoa', Number.isNaN(parsed) ? '' : parsed);
+            }}
             placeholder="0"
           />
         </div>
@@ -204,7 +223,10 @@ export default function PropertyForm({ values, onChange, errors = {} }) {
             type="number"
             className="input input-bordered w-full"
             value={values.expenses.managementPercent}
-            onChange={(e) => handleNestedChange('expenses', 'managementPercent', parseFloat(e.target.value) || '')}
+            onChange={(e) => {
+              const parsed = parseFloat(e.target.value);
+              handleNestedChange('expenses', 'managementPercent', Number.isNaN(parsed) ? '' : parsed);
+            }}
             placeholder="10"
           />
         </div>
@@ -218,7 +240,10 @@ export default function PropertyForm({ values, onChange, errors = {} }) {
             type="number"
             className="input input-bordered w-full"
             value={values.expenses.maintenancePercent}
-            onChange={(e) => handleNestedChange('expenses', 'maintenancePercent', parseFloat(e.target.value) || '')}
+            onChange={(e) => {
+              const parsed = parseFloat(e.target.value);
+              handleNestedChange('expenses', 'maintenancePercent', Number.isNaN(parsed) ? '' : parsed);
+            }}
             placeholder="1"
           />
         </div>
@@ -232,7 +257,10 @@ export default function PropertyForm({ values, onChange, errors = {} }) {
             type="number"
             className="input input-bordered w-full"
             value={values.expenses.vacancyPercent}
-            onChange={(e) => handleNestedChange('expenses', 'vacancyPercent', parseFloat(e.target.value) || '')}
+            onChange={(e) => {
+              const parsed = parseFloat(e.target.value);
+              handleNestedChange('expenses', 'vacancyPercent', Number.isNaN(parsed) ? '' : parsed);
+            }}
             placeholder="5"
           />
         </div>
@@ -251,7 +279,10 @@ export default function PropertyForm({ values, onChange, errors = {} }) {
             step="0.1"
             className={`input input-bordered w-full ${errors.interestRate ? 'input-error' : ''}`}
             value={values.financing.interestRate}
-            onChange={(e) => handleNestedChange('financing', 'interestRate', parseFloat(e.target.value) || '')}
+            onChange={(e) => {
+              const parsed = parseFloat(e.target.value);
+              handleNestedChange('financing', 'interestRate', Number.isNaN(parsed) ? '' : parsed);
+            }}
             placeholder="7.0"
           />
           {errors.interestRate && (
@@ -270,7 +301,10 @@ export default function PropertyForm({ values, onChange, errors = {} }) {
             type="number"
             className="input input-bordered w-full"
             value={values.financing.loanTerm}
-            onChange={(e) => handleNestedChange('financing', 'loanTerm', parseInt(e.target.value) || '')}
+            onChange={(e) => {
+              const parsed = parseInt(e.target.value);
+              handleNestedChange('financing', 'loanTerm', Number.isNaN(parsed) ? '' : parsed);
+            }}
             placeholder="30"
           />
         </div>
