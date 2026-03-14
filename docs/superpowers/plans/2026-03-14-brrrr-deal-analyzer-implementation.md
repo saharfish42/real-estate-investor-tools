@@ -372,7 +372,7 @@ git commit -m "feat: update PropertyForm purchase fields for BRRRR (cashDown, in
 - Modify: `src/components/analyzer/PropertyForm.jsx` (add after Purchase Details)
 - Test: `tests/components/analyzer/PropertyForm.test.jsx`
 
-**Context:** Add optional collapsible Refinance section with refinance loan field and calculated fields for cash pulled out and net cash invested.
+**Context:** Add optional Refinance section with refinance loan field and calculated fields. Note: For MVP simplicity, the section will always be visible (not collapsible) but fields are optional. Collapsible behavior can be added in future iteration.
 
 - [ ] **Step 1: Write failing test for refinance section**
 
@@ -955,13 +955,14 @@ Add to `tests/pages/DealAnalyzer.test.jsx`:
 
 ```javascript
 describe('validation', () => {
-  it('should validate cash down is required and >= 0', async () => {
+  it('should validate cash down must be >= 0 when entered', async () => {
     const user = userEvent.setup();
     render(<DealAnalyzer />);
 
-    // Try to save without cash down
+    // Try to save with negative cash down
     await user.type(screen.getByLabelText(/address/i), '123 Main St');
     await user.type(screen.getByLabelText(/purchase price/i), '250000');
+    await user.type(screen.getByLabelText(/cash down/i), '-5000');
     await user.type(screen.getByLabelText(/initial loan/i), '200000');
     await user.type(screen.getByLabelText(/monthly rent/i), '2000');
     await user.click(screen.getByRole('button', { name: /save property/i }));
@@ -1078,13 +1079,13 @@ git add src/pages/DealAnalyzer.jsx tests/pages/DealAnalyzer.test.jsx
 git commit -m "feat: update validation for BRRRR fields"
 ```
 
-### Task 8: Update DealAnalyzer - Save/Load Logic
+### Task 8: Update DealAnalyzer - Save Logic
 
 **Files:**
 - Modify: `src/pages/DealAnalyzer.jsx:179-237` (handleSave function)
 - Test: `tests/pages/DealAnalyzer.test.jsx`
 
-**Context:** Update handleSave to save new data structure with BRRRR fields and calculated values. Store annual expenses as annual values.
+**Context:** Update handleSave to save new data structure with BRRRR fields and calculated values. Store annual expenses as annual values. Note: Load logic already exists and will work with new structure since we're using spread operator. Old properties won't load correctly but this is acceptable pre-production.
 
 - [ ] **Step 1: Write failing test for save with new structure**
 
