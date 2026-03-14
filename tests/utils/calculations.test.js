@@ -9,8 +9,8 @@ describe('calculateMortgagePayment', () => {
 
     const payment = calculateMortgagePayment(loanAmount, annualRate, years);
 
-    // Expected: $1,596.45 (standard amortization formula)
-    expect(payment).toBeCloseTo(1596.45, 0);
+    // Expected: $1,596.73 (standard amortization formula)
+    expect(payment).toBeCloseTo(1596.73, 2);
   });
 
   it('should calculate monthly payment for 15-year loan', () => {
@@ -20,8 +20,8 @@ describe('calculateMortgagePayment', () => {
 
     const payment = calculateMortgagePayment(loanAmount, annualRate, years);
 
-    // Expected: $2,089.70
-    expect(payment).toBeCloseTo(2089.70, -1);
+    // Expected: $2,090.66 (standard amortization formula)
+    expect(payment).toBeCloseTo(2090.66, 2);
   });
 
   it('should handle 0% interest rate (cash purchase)', () => {
